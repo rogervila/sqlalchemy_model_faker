@@ -18,9 +18,10 @@ class factory:
         self.entity = entity
         self.faker = Faker() if faker is None else faker
 
-    def make(self, data: Optional[dict] = None, ignored_columns: list = []):
+    def make(self, data: Optional[dict] = None, types: Optional[dict] = None, ignored_columns: list = []):
         '''Generate SQLAlchemy Table instances with fake data'''
         data = {} if data is None else data
+        types = {} if types is None else types
 
         for column in getmembers(self.entity):
             column_name = column[0]  # type: str
@@ -31,11 +32,11 @@ class factory:
             column_data = column[1]  # type: InstrumentedAttribute
 
             if column_name not in data:
-                data[column_name] = self._fake(column_data)
+                data[column_name] = self._fake(column_data, types)
 
         return self.entity(**data)
 
-    def _fake(self, column_data: InstrumentedAttribute) -> Any:
+    def _fake(self, column_data: InstrumentedAttribute, types: dict) -> Any:
         '''Generate fake column data based on its type'''
 
         if not hasattr(column_data, 'type'):
@@ -53,6 +54,14 @@ class factory:
         # TODO: investigate handling foreign_keys instead of returning None
         if self._has_foreigns(column_data):
             return None
+
+        # Example: self.faker.email()
+        if column_data.key in types.keys():
+            try:
+                method = getattr(self.faker, types[column_data.key])
+                return method()
+            except Exception as e:
+                raise ValueError(f'Faker does not support "{types[column_data.key]}" method') from e  # nopep8
 
         _type = str(column_data.type).lower()
 
