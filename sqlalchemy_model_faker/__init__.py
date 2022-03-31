@@ -18,14 +18,14 @@ class factory:
         self.entity = entity
         self.faker = Faker() if faker is None else faker
 
-    # pylint: disable=dangerous-default-value
-    def make(self, data: dict = {}, ignored: list = ['metadata', 'registry']):
+    def make(self, data: Optional[dict] = None, ignored_columns: list = []):
         '''Generate SQLAlchemy Table instances with fake data'''
+        data = {} if data is None else data
 
         for column in getmembers(self.entity):
             column_name = column[0]  # type: str
 
-            if column_name.startswith('_') or column_name in ignored:
+            if column_name.startswith('__') or column_name in ignored_columns:
                 continue
 
             column_data = column[1]  # type: InstrumentedAttribute
@@ -38,7 +38,8 @@ class factory:
     def _fake(self, column_data: InstrumentedAttribute) -> Any:
         '''Generate fake column data based on its type'''
 
-        _type = str(column_data.type).lower()
+        if not hasattr(column_data, 'type'):
+            return None
 
         # Autoincrement values should not be faked.
         #
@@ -52,6 +53,8 @@ class factory:
         # TODO: investigate handling foreign_keys instead of returning None
         if self._has_foreigns(column_data):
             return None
+
+        _type = str(column_data.type).lower()
 
         if _type == 'text':
             return self.faker.text()

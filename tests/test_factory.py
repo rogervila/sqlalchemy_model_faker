@@ -64,6 +64,10 @@ class test_factory(unittest.TestCase):
         })
         self.assertEqual(test.id, id_value)
 
+    def test_ignored_columns(self):
+        test = factory(Test).make(ignored_columns=['test_integer'])
+        self.assertIsNone(test.test_integer)
+
     def _prepare_database(self) -> None:
         self.engine = create_engine('sqlite:///:memory:')
         self.session = sessionmaker(bind=self.engine)
