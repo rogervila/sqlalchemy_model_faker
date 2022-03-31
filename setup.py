@@ -4,17 +4,17 @@ with open('README.md', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
 setup(
-    name='python_pypi_package_template',
-    packages=['python_pypi_package_template'],
+    name='sqlalchemy_model_faker',
+    packages=['sqlalchemy_model_faker'],
     version='CURRENT_VERSION',
     license='MIT',
-    description='Python PYPI Package Template',
+    description='Generate SQLAlchemy models with fake data',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Roger Vilà',
     author_email='rogervila@me.com',
-    url='https://github.com/rogervila/python_package_template',
-    download_url='https://github.com/rogervila/python_package_template/archive/CURRENT_VERSION.tar.gz',
+    url='https://github.com/rogervila/sqlalchemy_model_faker',
+    download_url='https://github.com/rogervila/sqlalchemy_model_faker/archive/CURRENT_VERSION.tar.gz',
     keywords=['package template', 'project template', 'pypi template'],
     install_requires=[],
     classifiers=[

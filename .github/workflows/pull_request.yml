@@ -37,7 +37,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=rogervila-github
-            -Dsonar.projectKey=rogervila_python_package_template
+            -Dsonar.projectKey=rogervila_sqlalchemy_model_faker
             -Dsonar.sources=.
             -Dsonar.python.version=3.10
             -Dsonar.python.coverage.reportPaths=coverage.xml

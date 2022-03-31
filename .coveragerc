@@ -1,2 +1,2 @@
 [run]
-include = python_pypi_package_template/**
+include = sqlalchemy_model_faker/**

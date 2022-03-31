@@ -1,5 +1,5 @@
 import unittest
-from python_pypi_package_template import Example
+from sqlalchemy_model_faker import Example
 
 
 class test_example(unittest.TestCase):
