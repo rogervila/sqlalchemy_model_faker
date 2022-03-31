@@ -1,0 +1,47 @@
+name: pull_request
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage runtype wheel twine setuptools
+          coverage run -m unittest discover
+          coverage xml -i
+          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' coverage.xml
+      - name: Get PR author
+        id: get_author
+        run: echo ::set-output name=AUTHOR::${{ github.event.pull_request.user.login }}
+      - name: SonarCloud Scan
+        if: ${{ matrix.python-version == '3.10' && steps.get_author.outputs.AUTHOR == 'rogervila' }}
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.SONAR_GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=rogervila-github
+            -Dsonar.projectKey=rogervila_python_package_template
+            -Dsonar.sources=.
+            -Dsonar.python.version=3.10
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.exclusions=setup.py,tests/**
+            -Dsonar.test.exclusions=setup.py,tests/**
+            -Dsonar.tests=tests/
+            -Dsonar.verbose=true
