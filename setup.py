@@ -15,8 +15,11 @@ setup(
     author_email='rogervila@me.com',
     url='https://github.com/rogervila/sqlalchemy_model_faker',
     download_url='https://github.com/rogervila/sqlalchemy_model_faker/archive/CURRENT_VERSION.tar.gz',
-    keywords=['package template', 'project template', 'pypi template'],
-    install_requires=[],
+    keywords=['sqlalchemy fake model', 'sqlalchemy fake data'],
+    install_requires=[
+        'sqlalchemy >= 1.4.32',
+        'Faker >= 13.3.4',
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
