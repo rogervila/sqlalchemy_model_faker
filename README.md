@@ -63,7 +63,36 @@ product = factory(Product).make({'price': 288})
 print(product.price) # 288
 ```
 
-## Ignoring columns
+### Specific fake types
+
+[Faker](https://faker.readthedocs.io/en/master/providers.html) has methods to generate fake data in a specific format, like emails, addresses, IPs, etc.
+
+The fake data types can be specified passing a dict with column names and fake data types.
+
+```python
+from sqlalchemy_model_faker import factory
+
+product = factory(Product).make(types={'description': 'email'})
+
+# Emails have only 1 '@'
+print(product.description.count('@')) # 1
+
+# Emails have at least one '.'
+print(product.description.count('.') # >= 1
+```
+
+Custom values and fake types can be passed together.
+
+```python
+from sqlalchemy_model_faker import factory
+
+product = factory(Product).make({'price': 288}, types={'description': 'email'})
+
+print(product.price) # 288
+print(product.description) # valid email string
+```
+
+### Ignoring columns
 
 Columns might be ignored. Their generated value will be `None`.
 
@@ -75,6 +104,22 @@ from sqlalchemy_model_faker import factory
 product = factory(Product).make(ignored_columns=['price'])
 
 print(product.price) # None
+```
+
+### Custom Faker instance
+
+A custom faker instance can be passed to the `factory` constructor.
+
+This is useful to extend Faker, or replace it with a Mock when running tests.
+
+```python
+from faker import Faker
+from sqlalchemy_model_faker import factory
+
+faker = Faker() # Extend Faker as needed or replace it with a Mock
+product = factory(Product, faker).make()
+
+# etc
 ```
 
 ## License
