@@ -8,16 +8,21 @@ from sqlalchemy import create_engine, Column, Integer, Text
 from sqlalchemy_model_faker import factory
 
 
-class Test(declarative_base()):
-    __tablename__ = 'test'
+class Product(declarative_base()):
+    __tablename__ = 'products'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    test_text = Column(Text)
-    test_integer = Column(Integer)
+    description = Column(Text)
+    price = Column(Integer)
 
 
 class test_factory(unittest.TestCase):
     engine = None  # type: engine.base.Engine
     session = None  # type: Session
+
+    def test_column_data_types(self):
+        product = factory(Product).make()
+        self.assertIsInstance(product.description, str)
+        self.assertIsInstance(product.price, int)
 
     def test_factory_creates_model(self):
         self._prepare_database()
@@ -26,12 +31,12 @@ class test_factory(unittest.TestCase):
 
         with self.session() as session:
             for _ in range(amount):
-                test = factory(Test).make()  # type: Test
-                session.add(test)
+                product = factory(Product).make()  # type: Product
+                session.add(product)
                 session.commit()
 
         with self.session() as session:
-            results = session.query(Test).all()
+            results = session.query(Product).all()
             self.assertEqual(len(results), amount)
 
     def test_model_persisted_with_specified_data(self):
@@ -41,32 +46,32 @@ class test_factory(unittest.TestCase):
         text_value = 'lorem ipsum dolor sit amet'
 
         with self.session() as session:
-            test = factory(Test).make({
-                'test_integer': integer_value,
-                'test_text': text_value
-            })  # type: Test
-            session.add(test)
+            product = factory(Product).make({
+                'price': integer_value,
+                'description': text_value
+            })  # type: Product
+            session.add(product)
             session.commit()
 
         with self.session() as session:
-            test = session.query(Test).first()  # type: Test
-            self.assertEqual(test.test_integer, integer_value)
-            self.assertEqual(test.test_text, text_value)
+            product = session.query(Product).first()  # type: Product
+            self.assertEqual(product.price, integer_value)
+            self.assertEqual(product.description, text_value)
 
     def test_autoincremental_values_return_as_none(self):
-        test = factory(Test).make()
-        self.assertIsNone(test.id)
+        product = factory(Product).make()
+        self.assertIsNone(product.id)
 
     def test_autoincremental_values_return_specified_value(self):
         id_value = randint(42, 288)
-        test = factory(Test).make({
+        product = factory(Product).make({
             'id': id_value
         })
-        self.assertEqual(test.id, id_value)
+        self.assertEqual(product.id, id_value)
 
     def test_ignored_columns(self):
-        test = factory(Test).make(ignored_columns=['test_integer'])
-        self.assertIsNone(test.test_integer)
+        product = factory(Product).make(ignored_columns=['price'])
+        self.assertIsNone(product.price)
 
     def _prepare_database(self) -> None:
         self.engine = create_engine('sqlite:///:memory:')
@@ -74,10 +79,10 @@ class test_factory(unittest.TestCase):
 
         with self.engine.begin() as connection:
             connection.execute('''
-                CREATE TABLE test (
+                CREATE TABLE products (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    test_text TEXT,
-                    test_integer INTEGER
+                    description TEXT,
+                    price INTEGER
                 )
             ''')
 
