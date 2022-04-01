@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from random import randint
 from inspect import getmembers
 from typing import Optional, Any
+from uuid import uuid4
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from faker import Faker
 
@@ -63,15 +63,40 @@ class factory:
             except Exception as e:
                 raise ValueError(f'Faker does not support "{types[column_data.key]}" method') from e  # nopep8
 
-        _type = str(column_data.type).lower()
+        _type = str(column_data.type).lower().strip()
+
+        if _type in ('biginteger', 'bigint'):
+            return self.faker.random_int(min=0, max=10000)
+
+        if _type in ('boolean', 'bool'):
+            return self.faker.boolean()
+
+        if _type == 'date':
+            return self.faker.date_time().date()
+
+        if _type == 'datetime':
+            return self.faker.date_time()
+
+        if _type in ('float', 'numeric'):
+            return float(self.faker.random_int(min=100, max=1000)) / 10
+
+        if _type in ('integer', 'int'):
+            return self.faker.random_int(min=0, max=1000)
+
+        if _type in ('smallinteger', 'smallint'):
+            return self.faker.random_int(min=0, max=1)
+
+        if _type in ('string', 'str', 'varchar'):
+            return self.faker.sentence()
 
         if _type == 'text':
             return self.faker.text()
 
-        if _type == 'integer':
-            return randint(0, 1000)
+        if _type == 'time':
+            return self.faker.date_time().time()
 
-        # TODO: more column types support
+        if _type in ('uuid', 'uniqueidentifier'):
+            return uuid4()
 
         return None
 
