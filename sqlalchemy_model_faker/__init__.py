@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import re
 from inspect import getmembers
 from typing import Optional, Any
 from uuid import uuid4
@@ -85,6 +86,11 @@ class factory:
 
         if _type in ('smallinteger', 'smallint'):
             return self.faker.random_int(min=0, max=1)
+
+        # pylint: disable=anomalous-backslash-in-string
+        string_length = re.search('varchar\((\d+)\)', _type)
+        if string_length is not None:
+            return self.faker.sentence()[:int(string_length.group(1))]
 
         if _type in ('string', 'str', 'varchar'):
             return self.faker.sentence()
