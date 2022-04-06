@@ -7,11 +7,14 @@ from sqlalchemy import create_engine, engine, Column, BigInteger, Boolean, Date,
 from faker import Faker
 from sqlalchemy_model_faker import factory
 
+FIELD_LENGTH = 13
+
 
 class Product(declarative_base()):
     __tablename__ = 'products'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
+    short_name = Column(String(FIELD_LENGTH))
     description = Column(Text)
     price = Column(Integer)
     total_sells = Column(BigInteger)
@@ -33,6 +36,7 @@ class test_factory(unittest.TestCase):
         product = factory(Product).make()
         self.assertIsNone(product.id)
         self.assertIsInstance(product.name, str)
+        self.assertIsInstance(product.short_name, str)
         self.assertIsInstance(product.description, str)
         self.assertIsInstance(product.price, int)
         self.assertIsInstance(product.total_sells, int)
@@ -77,6 +81,7 @@ class test_factory(unittest.TestCase):
             product = factory(Product).make({
                 'price': integer_value,
                 'name': string_value,
+                'short_name': string_value,
                 'description': text_value,
                 'total_sells': bigint_value,
                 'is_active': boolean_value,
@@ -94,6 +99,7 @@ class test_factory(unittest.TestCase):
             product = session.query(Product).first()  # type: Product
             self.assertEqual(product.price, integer_value)
             self.assertEqual(product.name, string_value)
+            self.assertEqual(product.short_name, string_value)
             self.assertEqual(product.description, text_value)
             self.assertEqual(product.total_sells, bigint_value)
             self.assertEqual(product.is_active, boolean_value)
@@ -114,6 +120,11 @@ class test_factory(unittest.TestCase):
             'id': id_value
         })
         self.assertEqual(product.id, id_value)
+
+    def test_max_string_length(self):
+        product = factory(Product).make()
+
+        self.assertLessEqual(len(product.short_name), FIELD_LENGTH)
 
     def test_ignored_columns(self):
         product = factory(Product).make(ignored_columns=['price'])
@@ -156,10 +167,11 @@ class test_factory(unittest.TestCase):
         self.session = sessionmaker(bind=self.engine)
 
         with self.engine.begin() as connection:
-            connection.execute('''
+            connection.execute(f'''
                 CREATE TABLE products (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name VARCHAR(255),
+                    short_name VARCHAR({FIELD_LENGTH}),
                     description TEXT,
                     price INTEGER,
                     total_sells BIGINT,
