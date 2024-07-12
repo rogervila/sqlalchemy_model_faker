@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Python ${{ matrix.python-version }}
@@ -28,20 +28,3 @@ jobs:
       - name: Get PR author
         id: get_author
         run: echo ::set-output name=AUTHOR::${{ github.event.pull_request.user.login }}
-      - name: SonarCloud Scan
-        if: ${{ matrix.python-version == '3.10' && steps.get_author.outputs.AUTHOR == 'rogervila' }}
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.SONAR_GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=rogervila-github
-            -Dsonar.projectKey=rogervila_sqlalchemy_model_faker
-            -Dsonar.sources=.
-            -Dsonar.python.version=3.10
-            -Dsonar.python.coverage.reportPaths=coverage.xml
-            -Dsonar.exclusions=setup.py,tests/**
-            -Dsonar.test.exclusions=setup.py,tests/**
-            -Dsonar.tests=tests/
-            -Dsonar.verbose=true
