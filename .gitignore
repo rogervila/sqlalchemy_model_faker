@@ -7,3 +7,4 @@ build/
 htmlcov/
 *.dat
 MANIFEST
+.idea/

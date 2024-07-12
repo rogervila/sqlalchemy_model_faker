@@ -3,7 +3,8 @@ from datetime import datetime, date, time
 from sqlalchemy.orm.session import Session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine, engine, Column, BigInteger, Boolean, Date, DateTime, Float, Integer, Numeric, SmallInteger, String, Text, Time
+from sqlalchemy import create_engine, engine, Column, BigInteger, Boolean, Date, DateTime, Float, Integer, Numeric, \
+    SmallInteger, String, Text, Time, text
 from faker import Faker
 from sqlalchemy_model_faker import factory
 
@@ -96,7 +97,8 @@ class test_factory(unittest.TestCase):
             session.commit()
 
         with self.session() as session:
-            product = session.query(Product).first()  # type: Product
+            product = session.query(Product).first()  # type: Product | None
+            self.assertIsNotNone(product)
             self.assertEqual(product.price, integer_value)
             self.assertEqual(product.name, string_value)
             self.assertEqual(product.short_name, string_value)
@@ -167,7 +169,7 @@ class test_factory(unittest.TestCase):
         self.session = sessionmaker(bind=self.engine)
 
         with self.engine.begin() as connection:
-            connection.execute(f'''
+            connection.execute(text(f'''
                 CREATE TABLE products (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name VARCHAR(255),
@@ -183,7 +185,7 @@ class test_factory(unittest.TestCase):
                     total_units NUMERIC,
                     rate FLOAT
                 )
-            ''')
+            '''))
 
 
 if __name__ == '__main__':
